@@ -1,3 +1,9 @@
+0.05  Wed Sep 19 06:00:12 EDT 2001
+    * Things were still pretty broken.  I *think* I have the tests
+      sorted out now.
+    * Blows over any CORE::GLOBAL::caller, die or warn you might have
+      set.  I'll fix this soon.
+
 0.04  Wed Sep 19 04:28:19 EDT 2001
     * Ooops, we'd broken caller().  Turns out the tests were wrong.
 

@@ -4,7 +4,7 @@ use 5.006;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT $Up_Frames);
-$VERSION = 0.04;
+$VERSION = 0.05;
 
 # We have to do this so the CORE::GLOBAL versions override the builtins
 _setup_CORE_GLOBAL();
@@ -78,28 +78,21 @@ sub _setup_CORE_GLOBAL {
         else {
             return $caller[0];
         }
-    } unless *CORE::GLOBAL::caller{CODE};
-
-    my $old_die = \&CORE::GLOBAL::die;
-    *CORE::GLOBAL::die = sub {
-        if( @_ and $_[0] !~ /\n$/ ) {
-            $old_die->(sprintf("%s at %s line %d.\n", join('', @_), 
-                               (caller($Up_Frames))[1,2]));
-        }
-        else {
-            CORE::die @_;
-        }
     };
 
-    my $old_warn = \&CORE::GLOBAL::warn;
+    *CORE::GLOBAL::die = sub {
+        my $msg = (!@_ || $_[0] =~ /\n$/) ? 'Died' : join '', @_;
+
+        CORE::die(sprintf("$msg at %s line %d.\n",
+                          (caller($Up_Frames - 1))[1,2]));
+    };
+
     *CORE::GLOBAL::warn = sub {
-        if( @_ and $_[0] !~ /\n$/ ) {
-            $old_warn->(sprintf("%s at %s line %d.\n", join('', @_), 
-                                (caller($Up_Frames))[1,2]));
-        }
-        else {
-            CORE::warn @_;
-        }
+        my $msg = (!@_ || $_[0] =~ /\n$/) ? "Warning: something's wrong"
+                                          : join '', @_;
+
+        CORE::warn(sprintf("$msg at %s line %d.\n",
+                           (caller($Up_Frames - 1))[1,2]));
     };
 }
 
@@ -112,6 +105,9 @@ Symbol::Uplevel must be used before any code which uses it.
 
 Well, the bad news is uplevel() is about 5 times slower than a normal
 function call.  XS implementation anyone?
+
+Blows over any CORE::GLOBAL::caller, die or warn you might have.  Will
+be fixed in a newer version.
 
 =head1 AUTHOR
 
