@@ -4,7 +4,7 @@ use 5.006;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT $Up_Frames);
-$VERSION = 0.03;
+$VERSION = 0.04;
 
 # We have to do this so the CORE::GLOBAL versions override the builtins
 _setup_CORE_GLOBAL();
@@ -51,7 +51,7 @@ for them.
 
 =cut
 
-$Up_Frames = 0;
+$Up_Frames = 1;
 sub uplevel {
     my($num_frames, $func, @args) = @_;
     local $Up_Frames = $num_frames + 2;
@@ -109,6 +109,18 @@ sub _setup_CORE_GLOBAL {
 =head1 BUGS and CAVEATS
 
 Symbol::Uplevel must be used before any code which uses it.
+
+Well, the bad news is uplevel() is about 5 times slower than a normal
+function call.  XS implementation anyone?
+
+=head1 AUTHOR
+
+Michael G Schwern E<lt>schwern@pobox.comE<gt>
+
+=head1 SEE ALSO
+
+PadWalker (for the similar idea with lexicals), Hook::LexWrap, 
+Tcl's uplevel() at http://www.scriptics.com/man/tcl8.4/TclCmd/uplevel.htm
 
 =cut
 

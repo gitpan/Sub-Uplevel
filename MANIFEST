@@ -3,3 +3,4 @@ MANIFEST
 Makefile.PL
 lib/Sub/Uplevel.pm
 t/Uplevel.t
+t/lib/Foo.pm

@@ -1,16 +1,17 @@
 #!/usr/bin/perl -Tw
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 14;
 
 BEGIN { use_ok('Sub::Uplevel'); }
 can_ok('Sub::Uplevel', 'uplevel');
 can_ok(__PACKAGE__, 'uplevel');
 
 #line 11
-ok( eq_array([caller], ['main', $0, 11]), "caller() not screwed up" );
+ok( !caller,                                "caller() not screwed up" );
+
 eval { die "Dying" };
-is( $@, "Dying at $0 line 12.\n",           'die() not screwed up' );
+is( $@, "Dying at $0 line 13.\n",           'die() not screwed up' );
 
 sub foo {
     join " - ", caller;
@@ -74,10 +75,11 @@ You couldn't fool me on the foolingest day of the year! at $0 line 69
 	eval {...} called at $0 line 69
 CARP
 
-#line 78
-ok( eq_array( [caller], ['main', $0, 78]),  "caller() not screwed up" );
+#line 79
+ok( !caller,                                "caller() not screwed up" );
+
 eval { die "Dying" };
-is( $@, "Dying at $0 line 79.\n",           'die() not screwed up' );
+is( $@, "Dying at $0 line 81.\n",           'die() not screwed up' );
 
 
 
@@ -98,3 +100,22 @@ $warning = '';
     wrap_carp();
 }
 is( $warning, "HA!  You don't fool me! at $0 line 98\n", 'carp() fooled' );
+
+
+use lib qw(t/lib);
+use Foo;
+can_ok( 'main', 'fooble' );
+
+
+sub core_caller_check {
+    return CORE::caller(0);
+}
+
+sub caller_check {
+    return caller(0);
+}
+
+#line 115
+ok( eq_array([caller_check()], 
+             ['main', $0, 115, 'main::caller_check', (caller_check)[4..9]]),
+    'caller check' );

@@ -1,3 +1,6 @@
+0.04  Wed Sep 19 04:28:19 EDT 2001
+    * Ooops, we'd broken caller().  Turns out the tests were wrong.
+
 0.03  Wed Sep 19 03:41:59 EDT 2001
     * Greatly simplified the uplevel logic
 
