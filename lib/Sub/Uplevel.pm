@@ -4,7 +4,7 @@ use 5.006;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 # We have to do this so the CORE::GLOBAL versions override the builtins
 _setup_CORE_GLOBAL();
@@ -164,16 +164,18 @@ around functions and they wouldn't be aware they've been wrapped.
 
 If this code frightens you B<you should not use this module.>
 
+
 =head1 BUGS and CAVEATS
 
-Symbol::Uplevel must be used as early as possible in your program's
+Sub::Uplevel must be used as early as possible in your program's
 compilation.
 
 Well, the bad news is uplevel() is about 5 times slower than a normal
 function call.  XS implementation anyone?
 
 Blows over any CORE::GLOBAL::caller you might have (and if you do,
-you're just sick).  Will be fixed in a newer version.
+you're just sick).
+
 
 =head1 HISTORY
 
@@ -182,13 +184,26 @@ Those who do not learn from HISTORY are doomed to repeat it.
 The lesson here is simple:  Don't sit next to a Tcl programmer at the
 dinner table.
 
+
 =head1 THANKS
 
 Thanks to Brent Welch, Damian Conway and Robin Houston.
 
+
 =head1 AUTHOR
 
 Michael G Schwern E<lt>schwern@pobox.comE<gt>
+
+
+=head1 LICENSE
+
+Copyright by Michael G Schwern
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
 
 =head1 SEE ALSO
 
