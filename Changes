@@ -1,4 +1,8 @@
-0.07
+0.08  Wed Oct 22 09:02:38 PDT 2003
+    - New die_check.t test was written in a non-portable manner.
+      [Thanks Martin Thurn and cpantesters]
+
+0.07  Tue Mar 18 03:03:22 GMT 2003
     - Fixed a test bug due to 5.6.0's differing Carp::croak stack output
 
 0.06  Thu Sep 20 08:50:30 EDT 2001
