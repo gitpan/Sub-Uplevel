@@ -1,3 +1,6 @@
+0.07
+    - Fixed a test bug due to 5.6.0's differing Carp::croak stack output
+
 0.06  Thu Sep 20 08:50:30 EDT 2001
     * Fixed a bug with deeply nested callers.
     * Fixed nested uplevel() calls.

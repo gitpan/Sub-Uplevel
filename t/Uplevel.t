@@ -69,12 +69,14 @@ sub wrap_croak {
     uplevel 1, \&try_croak;
 }
 
+
+my $croak_diag = $] <= 5.006 ? 'require 0' : 'eval {...}';
 # line 72
 eval { wrap_croak() };
 is( $@, <<CARP, 'croak() fooled');
 You couldn't fool me on the foolingest day of the year! at $0 line 68
 	main::wrap_croak() called at $0 line 72
-	eval {...} called at $0 line 72
+	$croak_diag called at $0 line 72
 CARP
 
 #line 79
