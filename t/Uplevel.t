@@ -1,7 +1,8 @@
 #!/usr/bin/perl -Tw
 
+use lib qw(t/lib);
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 18;
 
 BEGIN { use_ok('Sub::Uplevel'); }
 can_ok('Sub::Uplevel', 'uplevel');
@@ -36,7 +37,7 @@ sub wrap_die {
 
 # line 38
 eval { wrap_die() };
-is( $@, "You must die!  I alone am best! at $0 line 34.\n", 'die() fooled' );
+is( $@, "You must die!  I alone am best! at $0 line 30.\n", 'die() fooled' );
 
 
 # how about warn?
@@ -55,7 +56,7 @@ my $warning;
 #line 56
     wrap_warn();
 }
-is( $warning, "HA!  You don't fool me! at $0 line 48.\n", 'warn() fooled' );
+is( $warning, "HA!  You don't fool me! at $0 line 44.\n", 'warn() fooled' );
 
 
 # Carp?
@@ -106,11 +107,10 @@ HA!  You don't fool me! at $0 line 92
 CARP
 
 
-use lib qw(t/lib);
 use Foo;
 can_ok( 'main', 'fooble' );
 
-#line 110
+#line 114
 sub core_caller_check {
     return CORE::caller(0);
 }
@@ -120,5 +120,35 @@ sub caller_check {
 }
 
 ok( eq_array([caller_check()], 
-             ['main', $0, 118, 'main::caller_check', (caller_check)[4..9]]),
+             ['main', $0, 122, 'main::caller_check', (caller_check)[4..9]]),
     'caller check' );
+
+sub deep_caller {
+    return caller(1);
+}
+
+sub check_deep_caller {
+    deep_caller();
+}
+
+ok( eq_array([(check_deep_caller)[0..2]], ['main', $0, 134]), 
+                                                         'shallow caller' );
+
+
+
+sub deeper { deep_caller() }        # caller 0
+sub still_deeper { deeper() }       # caller 1
+sub ever_deeper  { still_deeper }   # caller 2
+
+ok( eq_array([(ever_deeper)[0..2]], ['main', $0, 140]), 'deep caller()' );
+
+# This uplevel() should not effect deep_caller's caller(1).
+sub yet_deeper { uplevel 1, \&ever_deeper }
+ok( eq_array([(yet_deeper)[0..2]],  ['main', $0, 140]),  
+                                                 'deep caller() + uplevel' );
+
+sub target { caller }
+sub yarrow { uplevel 1, \&target }
+sub hock   { uplevel 1, \&yarrow }
+
+ok( eq_array([(hock)], ['main', $0, 154]),  'nested uplevel()s' );

@@ -3,8 +3,8 @@ package Sub::Uplevel;
 use 5.006;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT $Up_Frames);
-$VERSION = 0.05;
+use vars qw($VERSION @ISA @EXPORT);
+$VERSION = 0.06;
 
 # We have to do this so the CORE::GLOBAL versions override the builtins
 _setup_CORE_GLOBAL();
@@ -15,7 +15,7 @@ require Exporter;
 
 =head1 NAME
 
-Sub::Uplevel - run a function in a higher stack frame
+Sub::Uplevel - apparently run a function in a higher stack frame
 
 =head1 SYNOPSIS
 
@@ -35,9 +35,10 @@ Sub::Uplevel - run a function in a higher stack frame
 =head1 DESCRIPTION
 
 Like Tcl's uplevel() function, but not quite so dangerous.  The idea
-is to fool caller().  All the other nasty bits of uplevel are
-unnecessary in Perl.
+is just to fool caller().  All the really naughty bits of Tcl's
+uplevel() are avoided.
 
+B<THIS IS NOT THE SORT OF THING YOU WANT TO DO EVERYDAY>
 
 =over 4
 
@@ -46,15 +47,35 @@ unnecessary in Perl.
   uplevel $num_frames, \&func, @args;
 
 Makes the given function think it's being executed $num_frames higher
-than the current stack level.  So caller() will be caller($num_frames)
-for them.
+than the current stack level.  So when they use caller($frames) it
+will actually caller($frames + $num_frames) for them.
+
+C<uplevel(1, \&some_func, @_)> is effectively C<goto &some_func> but
+you don't immediately exit the current subroutine.  So while you can't
+do this:
+
+    sub wrapper {
+        print "Before\n";
+        goto &some_func;
+        print "After\n";
+    }
+
+you can do this:
+
+    sub wrapper {
+        print "Before\n";
+        my @out = uplevel 1, &some_func;
+        print "After\n";
+        return @out;
+    }
+
 
 =cut
 
-$Up_Frames = 1;
+our $Up_Frames = 0;
 sub uplevel {
     my($num_frames, $func, @args) = @_;
-    local $Up_Frames = $num_frames + 2;
+    local $Up_Frames = $num_frames + $Up_Frames;
 
     return $func->(@args);
 }
@@ -65,7 +86,48 @@ sub _setup_CORE_GLOBAL {
 
     *CORE::GLOBAL::caller = sub {
         my $height = $_[0] || 0;
-        $height += $Up_Frames;
+
+=begin _private
+
+So it has to work like this:
+
+    Call stack               Actual     uplevel 1
+CORE::GLOBAL::caller
+Carp::short_error_loc           0
+Carp::shortmess_heavy           1           0
+Carp::croak                     2           1
+try_croak                       3           2
+uplevel                         4            
+function_that_called_uplevel    5            
+caller_we_want_to_see           6           3
+its_caller                      7           4
+
+So when caller(X) winds up below uplevel(), it only has to use  
+CORE::caller(X+1) (to skip CORE::GLOBAL::caller).  But when caller(X)
+winds up no or above uplevel(), it's CORE::caller(X+1+uplevel+1).
+
+Which means I'm probably going to have to do something nasty like walk
+up the call stack on each caller() to see if I'm going to wind up   
+before or after Sub::Uplevel::uplevel().
+
+=end _private
+
+=cut
+
+        $height++;  # up one to avoid this wrapper function.
+
+        my $saw_uplevel = 0;
+        # Yes, we need a C style for loop here since $height changes
+        for( my $up = 1;  $up <= $height + 1;  $up++ ) {
+            my @caller = CORE::caller($up);
+            if( $caller[0] eq __PACKAGE__ ) {
+                $height++;
+                $height += $Up_Frames unless $saw_uplevel;
+                $saw_uplevel = 1;
+            }
+        }
+                
+
         return undef if $height < 0;
         my @caller = CORE::caller($height);
 
@@ -80,34 +142,49 @@ sub _setup_CORE_GLOBAL {
         }
     };
 
-    *CORE::GLOBAL::die = sub {
-        my $msg = (!@_ || $_[0] =~ /\n$/) ? 'Died' : join '', @_;
-
-        CORE::die(sprintf("$msg at %s line %d.\n",
-                          (caller($Up_Frames - 1))[1,2]));
-    };
-
-    *CORE::GLOBAL::warn = sub {
-        my $msg = (!@_ || $_[0] =~ /\n$/) ? "Warning: something's wrong"
-                                          : join '', @_;
-
-        CORE::warn(sprintf("$msg at %s line %d.\n",
-                           (caller($Up_Frames - 1))[1,2]));
-    };
 }
 
 
 =back
 
+=head1 EXAMPLE
+
+The main reason I wrote this module is so I could write wrappers
+around functions and they wouldn't be aware they've been wrapped.
+
+    use Sub::Uplevel;
+
+    my $original_foo = \&foo;
+
+    *foo = sub {
+        my @output = uplevel 1, $original_foo;
+        print "foo() returned:  @output";
+        return @output;
+    };
+
+If this code frightens you B<you should not use this module.>
+
 =head1 BUGS and CAVEATS
 
-Symbol::Uplevel must be used before any code which uses it.
+Symbol::Uplevel must be used as early as possible in your program's
+compilation.
 
 Well, the bad news is uplevel() is about 5 times slower than a normal
 function call.  XS implementation anyone?
 
-Blows over any CORE::GLOBAL::caller, die or warn you might have.  Will
-be fixed in a newer version.
+Blows over any CORE::GLOBAL::caller you might have (and if you do,
+you're just sick).  Will be fixed in a newer version.
+
+=head1 HISTORY
+
+Those who do not learn from HISTORY are doomed to repeat it.
+
+The lesson here is simple:  Don't sit next to a Tcl programmer at the
+dinner table.
+
+=head1 THANKS
+
+Thanks to Brent Welch, Damian Conway and Robin Houston.
 
 =head1 AUTHOR
 

@@ -5,3 +5,6 @@ lib/Sub/Uplevel.pm
 t/Uplevel.t
 t/die_check.t
 t/lib/Foo.pm
+t/lib/Test/More.pm
+t/lib/Test/Simple.pm
+t/lib/Test/Utils.pm

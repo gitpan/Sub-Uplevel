@@ -1,3 +1,11 @@
+0.06  Thu Sep 20 08:50:30 EDT 2001
+    * Fixed a bug with deeply nested callers.
+    * Fixed nested uplevel() calls.
+    - Forgot to include Test::More dependency
+    - Added 5.006 dependency to Makefile.PL
+    - Removed unnecessary die and warn overrides
+    - Added DIRE WARNING to the docs.
+
 0.05  Wed Sep 19 06:00:12 EDT 2001
     * Things were still pretty broken.  I *think* I have the tests
       sorted out now.

@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+use lib qw(t/lib);
 use Test::More tests => 1;
 
 my $death = `$^X -I"lib" -I"blib/lib" -e "use Sub::Uplevel;  die" 2>&1`;
