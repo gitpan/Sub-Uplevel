@@ -2,7 +2,7 @@ NAME
     Sub::Uplevel - apparently run a function in a higher stack frame
 
 VERSION
-    This documentation describes version 0.22
+    version 0.23_01
 
 SYNOPSIS
       use Sub::Uplevel;
@@ -33,7 +33,7 @@ DESCRIPTION
         caller($frames) it will actually give caller($frames + $num_frames)
         for them.
 
-        `uplevel(1, \&some_func, @_)' is effectively `goto &some_func' but
+        "uplevel(1, \&some_func, @_)" is effectively "goto &some_func" but
         you don't immediately exit the current subroutine. So while you
         can't do this:
 
@@ -52,8 +52,23 @@ DESCRIPTION
                 return @out;
             }
 
-        `uplevel' will issue a warning if `$num_frames' is more than the
-        current call stack depth.
+        "uplevel" has the ability to issue a warning if $num_frames is more
+        than the current call stack depth, although this warning is disabled
+        and compiled out by default as the check is relatively expensive.
+
+        To enable the check for debugging or testing, you should set the
+        global $Sub::Uplevel::CHECK_FRAMES to true before loading
+        Sub::Uplevel for the first time as follows:
+
+            #!/usr/bin/perl
+    
+            BEGIN {
+                $Sub::Uplevel::CHECK_FRAMES = 1;
+            }
+            use Sub::Uplevel;
+
+        Setting or changing the global after the module has been loaded will
+        have no effect.
 
 EXAMPLE
     The main reason I wrote this module is so I could write wrappers around
@@ -88,12 +103,12 @@ BUGS and CAVEATS
     As with all CORE::GLOBAL overloading, the overload will not affect
     modules that have already been compiled prior to the overload. One
     module that often is unavoidably loaded prior to Sub::Uplevel is
-    Exporter. To forceably recompile Exporter (and Exporter::Heavy) after
+    Exporter. To forcibly recompile Exporter (and Exporter::Heavy) after
     loading Sub::Uplevel, use it with the ":aggressive" tag:
 
         use Sub::Uplevel qw/:aggressive/;
 
-    The private function `Sub::Uplevel::_force_reload()' may be passed a
+    The private function "Sub::Uplevel::_force_reload()" may be passed a
     list of additional modules to reload if ":aggressive" is not aggressive
     enough. Reloading modules may break things, so only use this as a last
     resort.
@@ -109,21 +124,34 @@ HISTORY
 THANKS
     Thanks to Brent Welch, Damian Conway and Robin Houston.
 
-AUTHORS
-    David A Golden <dagolden@cpan.org> (current maintainer)
-
-    Michael G Schwern <schwern@pobox.com> (original author)
-
-LICENSE
-    Original code Copyright (c) 2001 to 2007 by Michael G Schwern.
-    Additional code Copyright (c) 2006 to 2008 by David A Golden.
-
-    This program is free software; you can redistribute it and/or modify it
-    under the same terms as Perl itself.
-
     See http://www.perl.com/perl/misc/Artistic.html
 
 SEE ALSO
     PadWalker (for the similar idea with lexicals), Hook::LexWrap, Tcl's
     uplevel() at http://www.scriptics.com/man/tcl8.4/TclCmd/uplevel.htm
+
+SUPPORT
+  Bugs / Feature Requests
+    Please report any bugs or feature requests through the issue tracker at
+    <http://rt.cpan.org/Public/Dist/Display.html?Name=Sub-Uplevel>. You will
+    be notified automatically of any progress on your issue.
+
+  Source Code
+    This is open source software. The code repository is available for
+    public review and contribution under the terms of the license.
+
+    <https://github.com/dagolden/sub-uplevel>
+
+      git clone https://github.com/dagolden/sub-uplevel.git
+
+AUTHORS
+    *   Michael Schwern <mschwern@cpan.org>
+
+    *   David Golden <dagolden@cpan.org>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2012 by Michael Schwern and David Golden.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
 
