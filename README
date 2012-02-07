@@ -2,7 +2,7 @@ NAME
     Sub::Uplevel - apparently run a function in a higher stack frame
 
 VERSION
-    version 0.23_01
+    version 0.23_02
 
 SYNOPSIS
       use Sub::Uplevel;
