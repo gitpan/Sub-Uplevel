@@ -2,7 +2,7 @@ package Sub::Uplevel;
 use 5.006;
 use strict;
 # ABSTRACT: apparently run a function in a higher stack frame
-our $VERSION = '0.23_03'; # VERSION
+our $VERSION = '0.24'; # VERSION
 
 # Frame check global constant
 our $CHECK_FRAMES;
@@ -157,7 +157,7 @@ Sub::Uplevel - apparently run a function in a higher stack frame
 
 =head1 VERSION
 
-version 0.23_03
+version 0.24
 
 =head1 SYNOPSIS
 

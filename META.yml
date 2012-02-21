@@ -28,7 +28,7 @@ no_index:
 provides:
   Sub::Uplevel:
     file: lib/Sub/Uplevel.pm
-    version: 0.23_03
+    version: 0.24
 requires:
   Carp: 0
   constant: 0
@@ -39,4 +39,4 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Sub-Uplevel
   homepage: https://github.com/dagolden/sub-uplevel
   repository: https://github.com/dagolden/sub-uplevel.git
-version: 0.23_03
+version: 0.24
